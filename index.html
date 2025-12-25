@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>e-SURAT LANTIKAN KOKO</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        /* Set font body dan preview kepada Arial/Sans-Serif */
+        body { font-family: Arial, Helvetica, sans-serif; background-color: #f3f4f6; }
+        .preview-box { background: white; border: 1px solid #ddd; padding: 40px; width: 210mm; min-height: 297mm; margin: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-family: Arial, Helvetica, sans-serif; }
+        
+        .letterhead-container { display: flex; align-items: center; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; }
+        .jata-img { width: 80px; height: auto; margin-right: 20px; }
+        .school-details { text-align: left; font-weight: bold; line-height: 1.2; }
+        .sig-wrapper { display: inline-block; text-align: left; }
+        .signature-line-preview { border-bottom: 1px solid transparent; margin-bottom: 4px; height: 40px; }
+        
+        .app-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border-radius: 0.75rem 0.75rem 0 0;
+            padding: 2rem 1rem;
+        }
+        .logo-shadow {
+            filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.3));
+        }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div id="loader" class="loading-overlay">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white mb-4"></div>
+        <p class="font-bold">Sedang menyimpan ke Google Drive...</p>
+    </div>
+
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Bahagian Input Form -->
+        <div class="bg-white rounded-xl shadow-xl h-fit overflow-hidden">
+            <div class="app-header flex flex-col items-center text-center">
+                <div class="bg-white/10 p-2 rounded-full mb-3 backdrop-blur-sm">
+                    <img src="https://i.postimg.cc/bw5gx6Qd/LOGO_SESDI_removebg_preview.png" alt="Logo Sekolah" class="h-24 w-auto logo-shadow">
+                </div>
+                <h1 class="text-2xl font-bold text-white tracking-wide">e-SURAT LANTIKAN KOKO</h1>
+                <div class="h-1 w-16 bg-yellow-400 my-2 rounded-full"></div>
+                <h2 class="text-lg font-medium text-blue-100 uppercase tracking-widest">SK SERI BANDI 2</h2>
+            </div>
+            
+            <div class="p-6 space-y-4">
+                <div class="flex items-center gap-2 mb-2 text-gray-700 border-b pb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span class="font-bold uppercase text-xs tracking-tighter">Maklumat Penerima Lantikan</span>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Nama Penuh Guru</label>
+                    <input type="text" id="nama" oninput="updatePreview()" placeholder="NAMA GURU" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none uppercase transition-all">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">No. Kad Pengenalan</label>
+                    <input type="text" id="ic" oninput="updatePreview()" placeholder="123456-78-9101" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Rujukan Kami</label>
+                        <input type="text" id="rujukan" oninput="updatePreview()" value="SKSB2 600-3/1/1 ( 04 )" class="w-full p-2 border border-gray-200 rounded mt-1 bg-gray-50 text-gray-600">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Tarikh Surat</label>
+                        <input type="text" id="tarikhSurat" oninput="updatePreview()" value="06.01.2026" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Senarai Jawatan (Satu baris satu jawatan)</label>
+                    <textarea id="jawatan" oninput="updatePreview()" rows="5" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Setiausaha Sukan&#10;Jurulatih Ping Pong"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                    <button onclick="generatePDF('save')" class="bg-blue-700 text-white py-4 rounded-lg font-bold hover:bg-blue-800 transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                        Jana PDF
+                    </button>
+                    
+                    <button onclick="generatePDF('cloud')" class="bg-green-600 text-white py-4 rounded-lg font-bold hover:bg-green-700 transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                        Simpan ke Drive
+                    </button>
+                </div>
+            </div>
+            <div class="bg-gray-50 py-3 border-t text-center">
+                <p class="text-[9px] text-gray-400 uppercase tracking-[0.2em] font-semibold">UNIT KOKURIKULUM SK SERI BANDI 2</p>
+            </div>
+        </div>
+
+        <!-- Bahagian Live Preview -->
+        <div class="overflow-auto bg-gray-500 p-6 rounded-xl border-4 border-gray-600 shadow-2xl">
+            <div id="letterPreview" class="preview-box text-[11pt] leading-snug text-black"></div>
+        </div>
+
+    </div>
+
+    <script>
+        const { jsPDF } = window.jspdf;
+        const JATA_URL = "https://i.postimg.cc/DZZXfcgs/jata.png"; 
+        const GURU_BESAR = "(ZAMZURI BIN MOHD AMIN)";
+        
+        // --- KONFIGURASI GOOGLE APPS SCRIPT ---
+        const scriptURL = "https://script.google.com/macros/s/AKfycbyjD7PGnAvNUzUx1sq7cwEAJ9LMKqfdTRE2YNWHf4kwse4mmmYnZ81dUT_EoP4I9I6J/exec";
+
+        function getRoman(num) {
+            const roman = ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x"];
+            return roman[num] || (num + 1);
+        }
+
+        async function saveToGoogleDriveViaScript(base64Data, fileName) {
+            if (!scriptURL || scriptURL.includes("MASUKKAN_URL")) {
+                alert("Ralat: URL Google Apps Script tidak ditetapkan.");
+                return;
+            }
+
+            document.getElementById('loader').style.display = 'flex';
+
+            try {
+                const response = await fetch(scriptURL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        base64Pdf: base64Data,
+                        fileName: fileName
+                    })
+                });
+                
+                alert("Fail sedang diproses untuk disimpan ke Google Drive. Sila semak folder anda sebentar lagi.");
+                
+            } catch (err) {
+                alert("Ralat Rangkaian: " + err.message);
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+
+        function updatePreview() {
+            const nama = document.getElementById('nama').value || "[NAMA GURU]";
+            const ic = document.getElementById('ic').value || "[NO. KAD PENGENALAN]";
+            const rujukan = document.getElementById('rujukan').value;
+            const tarikh = document.getElementById('tarikhSurat').value;
+            const jawatanArr = document.getElementById('jawatan').value.split('\n').filter(j => j.trim() !== "");
+
+            let jawatanHTML = "";
+            if(jawatanArr.length === 0) {
+                jawatanHTML = "<div class='ml-8'>[SENARAI JAWATAN]</div>";
+            } else {
+                jawatanArr.forEach((j, index) => {
+                    const prefix = index === 0 ? "I" : getRoman(index);
+                    jawatanHTML += `<div class="flex ml-8"><span class="w-8">${prefix}.</span><span>${j}</span></div>`;
+                });
+            }
+
+            const content = `
+                <div class="letterhead-container">
+                    <img src="${JATA_URL}" class="jata-img" alt="Jata Malaysia">
+                    <div class="school-details text-[10pt]">
+                        <p>KEMENTERIAN PENDIDIKAN MALAYSIA</p>
+                        <p>SEKOLAH KEBANGSAAN SERI BANDI 2 (TBA 2054)</p>
+                        <p>24220 KEMAMAN</p>
+                        <p>TERENGGANU DARUL IMAN</p>
+                        <p class="font-normal">TEL : 09-8675111 / Email : TBA2054@moe.edu.my</p>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between mt-4 text-sm">
+                    <div></div>
+                    <div>
+                        <p>Ruj. Kami : ${rujukan}</p>
+                        <p>Tarikh : ${tarikh}</p>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <p class="font-bold">Kepada :</p>
+                    <p class="font-bold uppercase">${nama}</p>
+                    <p class="font-bold">${ic}</p>
+                </div>
+
+                <div class="mt-6">
+                    <p>Tuan,</p>
+                    <p class="font-bold mt-4 uppercase underline">PELANTIKAN JAWATANKUASA DALAM UNIT KOKURIKULUM 2026 SK SERI BANDI 2, KEMAMAN, TERENGGANU.</p>
+                </div>
+
+                <div class="mt-4">
+                    <p>Berhubungan dengan perkara di atas, sukacita dimaklumkan bahawa tuan telah dilantik sebagai :</p>
+                    <div class="mt-2 space-y-1">
+                        ${jawatanHTML}
+                    </div>
+                </div>
+
+                <div class="mt-6 text-justify">
+                    <p>Pelantikan ini berkuatkuasa mulai 11 Januari 2026 sehingga 03 Disember 2026. Tuan akan menjalankan tugas yang diberikan seperti dalam Peraturan 8 warta kerajaan bertarikh 21.05.1998, P.U ( A ) 196.</p>
+                </div>
+
+                <div class="mt-4 text-justify">
+                    <p>2. Semoga dengan pelantikan ini tuan / puan dapat menjalankan tugas dan tanggungjawab dengan penuh dedikasi untuk meningkatkan prestasi murid-murid dalam bidang kokurikulum.</p>
+                </div>
+
+                <div class="mt-8">
+                    <p>Sekian, terima kasih.</p>
+                    <p class="font-bold mt-4">"MEMACU PRAKARSA PENDIDIKAN"</p>
+                    <p class="font-bold">"MALAYSIA MADANI"</p>
+                    <p class="font-bold mt-1">"BERKHIDMAT UNTUK NEGARA"</p>
+                </div>
+
+                <div class="mt-12">
+                    <p>Saya yang menjalankan amanah,</p>
+                    <br><br>
+                    <div class="sig-wrapper">
+                        <div class="signature-line-preview uppercase font-bold text-transparent select-none">${GURU_BESAR}</div>
+                        <p class="font-bold uppercase">${GURU_BESAR}</p>
+                        <p>Guru Besar.</p>
+                        <p>SK Seri Bandi 2.</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('letterPreview').innerHTML = content;
+        }
+
+        async function generatePDF(mode = 'save') {
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const nama = document.getElementById('nama').value || "GURU";
+            const ic = document.getElementById('ic').value || "";
+            const rujukan = document.getElementById('rujukan').value;
+            const tarikh = document.getElementById('tarikhSurat').value;
+            const jawatanArr = document.getElementById('jawatan').value.split('\n').filter(j => j.trim() !== "");
+            const fileName = `Surat_Lantikan_KOKO_${nama.replace(/\s+/g, '_')}.pdf`;
+
+            try {
+                doc.addImage(JATA_URL, 'PNG', 20, 15, 22, 18);
+            } catch (e) { console.warn("Logo failed"); }
+
+            // Set fon kepada helvetica (persamaan Arial dalam jsPDF)
+            doc.setFont("helvetica", "bold").setFontSize(10);
+            doc.text("KEMENTERIAN PENDIDIKAN MALAYSIA", 45, 20);
+            doc.text("SEKOLAH KEBANGSAAN SERI BANDI 2 (TBA 2054)", 45, 24);
+            doc.text("24220 KEMAMAN", 45, 28);
+            doc.text("TERENGGANU DARUL IMAN", 45, 32);
+            doc.setFont("helvetica", "normal").text("TEL : 09-8675111 / Email : TBA2054@moe.edu.my", 45, 36);
+            doc.setLineWidth(0.5).line(20, 42, 190, 42);
+
+            doc.setFontSize(11).text(`Ruj. Kami : ${rujukan}`, 130, 52);
+            doc.text(`Tarikh : ${tarikh}`, 130, 57);
+
+            doc.setFont("helvetica", "bold").text("Kepada :", 20, 67);
+            doc.text(nama.toUpperCase(), 20, 72);
+            doc.text(ic, 20, 77);
+
+            doc.setFont("helvetica", "normal").text("Tuan,", 20, 87);
+            doc.setFont("helvetica", "bold");
+            const tajuk = "PELANTIKAN JAWATANKUASA DALAM UNIT KOKURIKULUM 2026 SK SERI BANDI 2, KEMAMAN, TERENGGANU.";
+            const splitTajuk = doc.splitTextToSize(tajuk, 170);
+            doc.text(splitTajuk, 20, 97);
+
+            doc.setFont("helvetica", "normal").text("Berhubungan dengan perkara di atas, sukacita dimaklumkan bahawa tuan telah dilantik sebagai :", 20, 112);
+
+            let yPos = 122;
+            jawatanArr.forEach((j, index) => {
+                const prefix = index === 0 ? "I." : `${getRoman(index)}.`;
+                doc.text(prefix, 30, yPos);
+                doc.text(j, 40, yPos);
+                yPos += 7;
+            });
+
+            yPos += 5;
+            const p1 = "Pelantikan ini berkuatkuasa mulai 11 Januari 2026 sehingga 03 Disember 2026. Tuan akan menjalankan tugas yang diberikan seperti dalam Peraturan 8 warta kerajaan bertarikh 21.05.1998, P.U ( A ) 196.";
+            doc.text(doc.splitTextToSize(p1, 170), 20, yPos);
+            
+            yPos += 20;
+            const p2 = "2. Semoga dengan pelantikan ini tuan / puan dapat menjalankan tugas dan tanggungjawab dengan penuh dedikasi untuk meningkatkan prestasi murid-murid dalam bidang kokurikulum.";
+            doc.text(doc.splitTextToSize(p2, 170), 20, yPos);
+
+            yPos += 20;
+            doc.text("Sekian, terima kasih.", 20, yPos);
+            yPos += 10;
+            doc.setFont("helvetica", "bold").text('"MEMACU PRAKARSA PENDIDIKAN"', 20, yPos);
+            yPos += 5;
+            doc.text('"MALAYSIA MADANI"', 20, yPos);
+            yPos += 5;
+            doc.text('"BERKHIDMAT UNTUK NEGARA"', 20, yPos);
+
+            yPos += 15;
+            doc.setFont("helvetica", "normal").text("Saya yang menjalankan amanah,", 20, yPos);
+            yPos += 25;
+            doc.setFont("helvetica", "bold");
+            doc.text(GURU_BESAR, 20, yPos + 4);
+            doc.setFont("helvetica", "normal").text("Guru Besar.", 20, yPos + 10);
+            doc.text("SK Seri Bandi 2.", 20, yPos + 15);
+
+            if (mode === 'cloud') {
+                const base64Pdf = doc.output('datauristring').split(',')[1];
+                await saveToGoogleDriveViaScript(base64Pdf, fileName);
+            } else {
+                doc.save(fileName);
+            }
+        }
+
+        updatePreview();
+    </script>
+</body>
+</html>
